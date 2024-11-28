@@ -12,7 +12,7 @@ interface Person {
     hair_color: string;
     skin_color: string;
     eye_color: string;
-    films: string[]; // Array of film URLs
+    films: string[];
 }
 
 interface Film {

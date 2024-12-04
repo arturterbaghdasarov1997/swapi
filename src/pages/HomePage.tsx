@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Card } from '@mui/material';
+import { Box } from '@mui/material';
 import { getPeople } from '../api/people/service';
-import { Link } from 'react-router-dom';
+import NavBar from '../components/NavBar';
+import { CharacterCards } from '../components/CharacterCards';
+import { PaginationControls } from '../components/PaginationControls';
 
 interface Person {
     name: string;
@@ -46,60 +48,15 @@ const HomePage: React.FC = () => {
 
     return (
         <Box>
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    gap: '10px',
-                    justifyContent: 'center',
-                }}
-            >
-                {loading ? (
-                    <Typography variant="h4">Loading...</Typography>
-                ) : (
-                    data.map(({ name, birth_year, gender }, index) => (
-                        <Card
-                            key={index}
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                border: '1px solid blue',
-                                borderRadius: '15px',
-                                padding: '10px',
-                                width: '200px',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Link to={`${index + 1 + (currentPage - 1) * 10}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                <Typography variant="h5">{name}</Typography>
-                                <Typography variant="body1">Birth Year: {birth_year}</Typography>
-                                <Typography variant="body1">Gender: {gender}</Typography>
-                            </Link>
-                        </Card>
-                    ))
-                )}
-            </Box>
-
-            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                <Button
-                    variant="contained"
-                    onClick={handlePrevPage}
-                    disabled={currentPage === 1}
-                    sx={{ marginRight: '10px' }}
-                >
-                    Previous
-                </Button>
-                <Typography variant="body1" sx={{ alignSelf: 'center', marginX: '10px' }}>
-                    Page {currentPage} of {totalPages}
-                </Typography>
-                <Button
-                    variant="contained"
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </Button>
+            <NavBar />
+            <Box sx={{ padding: '20px' }}>
+                <CharacterCards data={data} loading={loading} currentPage={currentPage} />
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    handlePrevPage={handlePrevPage}
+                    handleNextPage={handleNextPage}
+                />
             </Box>
         </Box>
     );

@@ -1,31 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { getPersonById } from '../api/people/service';
 import { getFilmsById } from '../api/films/service';
-import { Paper, Typography, List, ListItem } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import { useParams } from 'react-router-dom';
-
-interface Person {
-    name: string;
-    birth_year: string;
-    height: string;
-    mass: string;
-    hair_color: string;
-    skin_color: string;
-    eye_color: string;
-    films: string[];
-}
-
-interface Film {
-    title: string;
-    episode_id: number;
-    release_date: string;
-    director: string, 
-    producer: string, 
-}
+import { getHomeworldById } from '../api/homeworld/service';
+import NavBar from '../components/NavBar';
+import { Person } from '../interfaces/person/person.interface';
+import { Film } from '../interfaces/film/film.interface';
+import { Homeworld } from '../interfaces/homeworld/homeworld.interface';
+import PersonComponent from '../components/Person';
+import HomeworldComponent from '../components/Homeworld';
+import FilmComponent from '../components/Film';
 
 const PeoplePage: React.FC = () => {
     const [data, setData] = useState<Person | null>(null);
     const [films, setFilms] = useState<Film[]>([]);
+    const [homeworld, setHomeworld] = useState<Homeworld | null>(null);
     const [loading, setLoading] = useState(true);
     const { id } = useParams<{ id: string }>();
 
@@ -37,6 +27,7 @@ const PeoplePage: React.FC = () => {
                 const person = await getPersonById(Number(id));
                 setData(person);
 
+                // Fetch films
                 const filmIds = person.films.map((filmUrl: string) =>
                     parseInt(filmUrl.split('/').filter(Boolean).pop() || '0')
                 );
@@ -44,6 +35,13 @@ const PeoplePage: React.FC = () => {
                     filmIds.map((filmId: number) => getFilmsById(filmId))
                 );
                 setFilms(fetchedFilms);
+
+                // Fetch homeworld
+                const homeworldId = parseInt(
+                    person.homeworld.split('/').filter(Boolean).pop() || '0'
+                );
+                const fetchedHomeworld = await getHomeworldById(homeworldId);
+                setHomeworld(fetchedHomeworld);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -63,45 +61,23 @@ const PeoplePage: React.FC = () => {
     }
 
     return (
-        <Paper
-            elevation={4}
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px',
-                padding: '20px',
-            }}
-        >
-            <Typography variant="h2">{data.name}</Typography>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                Birth Year: {data.birth_year}
-            </Typography>
-            <Typography variant="h6">
-                Mass: {data.mass}, Height: {data.height}
-            </Typography>
-            <Typography variant="body1">Hair Color: {data.hair_color}</Typography>
-            <Typography variant="body1">Eye color: {data.eye_color}</Typography>
-            <Typography variant="body1">Skin Color: {data.skin_color}</Typography>
-
-            <Typography variant="h4" sx={{ marginTop: '20px' }}>
-                Films:
-            </Typography>
-            <List>
-                {films.map((film) => (
-                    <ListItem key={film.episode_id} sx={{display: 'flex', flexDirection: 'column'}}>
-                        <Typography variant="h5">
-                            <strong>{film.title}</strong> ({film.release_date})
-                        </Typography>
-                        <Typography variant="body1">
-                            <strong>Director:</strong> {film.director}
-                        </Typography>
-                        <Typography variant="body1">
-                            <strong>Producer:</strong> {film.producer}
-                        </Typography>
-                    </ListItem>
-                ))}
-            </List>
-        </Paper>
+        <Box>
+            <NavBar />
+            <Paper
+                elevation={4}
+                sx={{
+                    marginTop: '80px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                    padding: '20px',
+                }}
+            >
+                <PersonComponent person={data} />
+                <HomeworldComponent homeworld={homeworld} />
+                <FilmComponent films={films} />
+            </Paper>
+        </Box>
     );
 };
 
